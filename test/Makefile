@@ -1,6 +1,6 @@
 ###################################################################
 # Output filename:
-PROJECT		= btl18f2520
+PROJECT		= test
 
 # Architecture:
 ARCH		= pic16
@@ -9,13 +9,11 @@ ARCH		= pic16
 CPU		= 18f2520
 
 # Source file:
-SOURCE		= loader.asm
+SOURCE		= test.asm
 
 # Flags:
 CFLAGS		= -C
 
-
-PROJECT_PVR 	= 1
 
 ###################################################################
 

@@ -10,3 +10,6 @@
 *.hex
 *.cof
 *.map
+
+
+*.pyc

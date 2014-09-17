@@ -22,37 +22,37 @@ osc SET 0x70
 endif
 
 if (CLOCK == 4000000)
-osc SET 0x60		; 4MHz int. osc,
+osc SET 0x60        ; 4MHz int. osc,
 endif
-		
+        
 if (CLOCK == 2000000)
-osc SET 0x50		; 2MHz int. osc,		
+osc SET 0x50        ; 2MHz int. osc,        
 endif
-		
+        
 if (CLOCK == 1000000)
-osc SET 0x40		; 1MHz int. osc,				
+osc SET 0x40        ; 1MHz int. osc,                
 endif
-		
+        
 if (CLOCK == 500000)
-osc SET 0x30		; 500KHz int. osc,				
+osc SET 0x30        ; 500KHz int. osc,              
 endif
-				
+                
 if (CLOCK == 250000)
-osc SET 0x20		; 250KHz int. osc,				
+osc SET 0x20        ; 250KHz int. osc,              
 endif
-		
+        
 if (CLOCK == 125000)
-osc SET 0x10		; 125KHz int. osc,				
+osc SET 0x10        ; 125KHz int. osc,              
 endif
 
 if (OSC_TYPE == 0x02 && osc == 0 && CLOCK != 31000)
-		error "Invalid clock setting for internal oscillator"
+        error "Invalid clock setting for internal oscillator"
 endif
 
-		movlw	osc+OSC_TYPE
-		movwf	OSCCON
+        movlw   osc+OSC_TYPE
+        movwf   OSCCON
 
-		endm
+        endm
 
 
 
@@ -63,25 +63,25 @@ endif
 ;*******************************************************************************
 
 SET_TBLPTR macro address
-		
-		movlw		(address & 0xFF)
-		movwf		TBLPTRL
-		
+        
+        movlw       (address & 0xFF)
+        movwf       TBLPTRL
+        
 if (address > 0xFF)
-		movlw		(address & 0xFF00) >> 8
-		movwf		TBLPTRH
+        movlw       (address & 0xFF00) >> 8
+        movwf       TBLPTRH
 else
-		clrf		TBLPTRH		
+        clrf        TBLPTRH     
 endif
 
 if (address > 0xFFFF)
-		movlw		(address & 0xFF0000) >> 16
-		movwf		TBLPTRU
+        movlw       (address & 0xFF0000) >> 16
+        movwf       TBLPTRU
 else
-		clrf		TBLPTRU		
+        clrf        TBLPTRU     
 endif
 
-		endm
-		
-		
+        endm
+        
+        
 
