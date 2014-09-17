@@ -1,0 +1,12 @@
+# Ignore documents cache
+*.ods#
+.directory
+.kate-swp
+
+# Ignore compiled objects (GPASM) #
+*.o
+*.lst
+*.cod
+*.hex
+*.cof
+*.map

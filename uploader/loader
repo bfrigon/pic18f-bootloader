@@ -1,0 +1,153 @@
+#!/usr/bin/python
+
+################################################################################
+"""
+Uploader for pic 18f bootloader
+"""
+################################################################################
+__version__    = "0.1"
+__author__     = "Benoit Frigon"
+__license__    = "GPL"
+__copyright__  = "Copyright (C) 2010-2012 Benoit Frigon. All rights reserved. Licensed under the GPL license"
+__email__      = "bfrigon@gmail.com"
+################################################################################
+
+import optparse
+import logging
+import os, sys
+import serial
+import re
+
+from serial import SerialException
+from HexFileParser import HexFileParser
+from HexFileParser import ExceptionParserError
+from HexFileParser import ExceptionUploadError
+
+### Initialize logger ###
+log = logging.getLogger('loader')
+log.setLevel(logging.INFO)
+
+log_handler = logging.StreamHandler()
+log_handler.setFormatter(logging.Formatter('[%(levelname)s] %(message)s'))
+log.addHandler(log_handler)
+
+
+# Init parser
+parser = optparse.OptionParser(
+	prog='loader',
+	version=__version__,
+	usage='%prog [options]... [source file] [target]')
+
+parser.add_option('--baud', '-b',
+	help='Baud rate (default: 38400)',
+	type='int',
+	default=38400)
+
+parser.add_option('--ping', '-p',
+	action='store_true',
+	help='Check if bootloader on the target is responding',
+	default='')
+
+parser.add_option('--debug', '-D',
+	action='store_true',
+	help='Enable debugging log.',
+	default='')
+
+parser.add_option('--silent', '-s',
+	action='store_true',
+	help='Silent output',
+	default='')
+
+parser.add_option('--skip-blocks', '-B',
+	help='Skip blocks in source file (.hex) within the specified address range in hexadecimal (ex. 0-3FF)',
+	dest='skip',
+	default='')
+	
+		
+options, arguments = parser.parse_args()		
+
+if options.debug:
+	log.setLevel(logging.DEBUG)
+
+if options.ping:
+
+	if len(arguments) < 1:
+	
+		if not options.silent:
+			log.error("Target is missing. (Ex. /dev/ttyUSB0)")
+		exit(-1)
+	
+	port = arguments[len(arguments) - 1]
+	try:
+		### Open serial port ###
+		if not options.silent:
+			log.info('Using serial port: "%s"' % port)
+			
+		sio = serial.Serial(port, options.baud, timeout=0.5)
+	
+		sio.write('?')
+		response = sio.read(3)
+
+	except SerialException as e:
+		if not options.silent:
+			log.error('Communication error : ' + str(e))
+		exit(-1)
+
+	if len(response) == 0 or response != 'S01':
+		if not options.silent:
+			log.error('Target is not responding')
+		exit(-2)
+		
+	log.info("Target is responding")
+	exit(0)
+
+
+
+
+
+if len(arguments) < 1:
+	log.error("Source file is missing. (Ex. firmware.hex)")
+	exit(-1)
+
+if len(arguments) < 2:
+	log.error("Target is missing. (Ex. /dev/ttyUSB0)")
+	exit(-1)
+
+
+
+
+
+skip = []
+if len(options.skip) > 0:
+	try:
+		skip = map(lambda x: int(x, 16), re.split('[:,-]', options.skip))
+	except ValueError:
+		log.error('Invalid value for option --skip-blocks (%s)' % options.skip)
+		exit(-1)
+
+
+try:
+	### Open the hex file ###
+	hexfile = HexFileParser(arguments[0], logger=log, silent=options.silent)
+
+	hexfile.validate()
+	
+	hexfile.upload(arguments[1], options.baud, skip=skip)
+
+	
+except ExceptionUploadError as e:
+	if not options.silent:
+		log.error('Upload error: ' + str(e))
+	exit(-4)
+
+except ExceptionParserError as e:
+	if not options.silent:
+		log.error('Parser error: ' + str(e))
+	exit(-5)
+
+except SerialException as e:
+	if not options.silent:
+		log.error('Communication error : ' + str(e))
+	exit(-1)
+
+
